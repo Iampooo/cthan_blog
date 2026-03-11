@@ -1,0 +1,128 @@
+---
+import { getCollection } from 'astro:content';
+import ArticleItem from './ArticleItem.astro';
+import TypeFilter from './TypeFilter.astro';
+
+const allArticles = await getCollection('articles', ({ data }) => {
+  return data.draft !== true;
+});
+
+const filteredArticles = allArticles.filter(article => {
+  if (article.slug.endsWith('-en')) {
+    const baseSlug = article.slug.replace(/-en$/, '');
+    return !allArticles.some(a => a.slug === baseSlug);
+  }
+  return true;
+});
+
+// Sort by latest initially
+const sortedArticles = filteredArticles.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+let __currentYear = 0;
+---
+
+<div>
+  <TypeFilter />
+  
+  <ul id="article-list" class="flex flex-col list-none p-0 m-0">
+    {sortedArticles.map((article) => {
+      const year = article.data.date.getFullYear();
+      const showYear = year !== __currentYear;
+      if (showYear) __currentYear = year;
+      return (
+        <>
+          {showYear && <li class="year-header text-2xl font-serif text-text mt-8 mb-4 border-b border-border pb-2">{year}</li>}
+          <ArticleItem article={article} />
+        </>
+      );
+    })}
+  </ul>
+  
+  <p id="no-results" class="hidden text-text-muted py-8 text-center">No articles found matching those filters.</p>
+</div>
+
+<script>
+  let currentSort = 'desc';
+  let currentType = 'all';
+
+  const list = document.getElementById('article-list');
+  const noResults = document.getElementById('no-results');
+  let items = list ? Array.from(list.querySelectorAll('.article-item')) : [];
+
+  const updateList = () => {
+    if (!list || !noResults) return;
+    
+    let visibleCount = 0;
+    
+    // Sort items
+    items.sort((a, b) => {
+      const dateA = parseInt((a as HTMLElement).dataset.date || '0', 10);
+      const dateB = parseInt((b as HTMLElement).dataset.date || '0', 10);
+      return currentSort === 'desc' ? dateB - dateA : dateA - dateB;
+    });
+    
+    // Clear list and re-append to apply visual sort
+    list.innerHTML = '';
+    
+    let currentYear = null;
+    
+    items.forEach(item => {
+      const el = item as HTMLElement;
+      const t = el.dataset.type;
+      
+      const matchType = currentType === 'all' || t === currentType;
+      
+      if (matchType) {
+        visibleCount++;
+        
+        const year = new Date(parseInt(el.dataset.date || '0', 10)).getFullYear();
+        if (year !== currentYear) {
+          const yearHeader = document.createElement('li');
+          yearHeader.className = 'year-header text-2xl font-serif text-text mt-8 mb-4 border-b border-border pb-2';
+          yearHeader.textContent = year.toString();
+          list.appendChild(yearHeader);
+          currentYear = year;
+        }
+        
+        el.style.display = '';
+        list.appendChild(el);
+      } else {
+        el.style.display = 'none';
+        list.appendChild(el); // still append hidden items to keep them in DOM
+      }
+    });
+    
+    if (visibleCount === 0) {
+      noResults.classList.remove('hidden');
+    } else {
+      noResults.classList.add('hidden');
+    }
+  };
+
+  const bindFilters = (selector: string, stateKey: 'currentSort' | 'currentLang' | 'currentType', dataKey: string) => {
+    const buttons = document.querySelectorAll(selector);
+    buttons.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const target = e.currentTarget as HTMLElement;
+        const val = target.getAttribute(dataKey);
+        if (!val) return;
+        
+        // Update state
+        if (stateKey === 'currentSort') currentSort = val;
+        if (stateKey === 'currentType') currentType = val;
+        
+        // Update active class
+        buttons.forEach(b => b.setAttribute('data-active', 'false'));
+        target.setAttribute('data-active', 'true');
+        
+        updateList();
+      });
+    });
+  };
+
+  // Run on load and after view transitions (if added in the future)
+  document.addEventListener('DOMContentLoaded', () => {
+    bindFilters('.filter-sort', 'currentSort', 'data-sort');
+    bindFilters('.filter-type', 'currentType', 'data-type');
+  });
+</script>

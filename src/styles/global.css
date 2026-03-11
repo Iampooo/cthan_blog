@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: var(--bg);
+  --color-bg-surface: var(--bg-surface);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-accent: var(--accent);
+  --color-link: var(--link);
+  --color-link-hover: var(--link-hover);
+  --color-border: var(--border);
+
+  --font-sans: 'DM Sans', sans-serif;
+  --font-serif: 'Spectral', serif;
+  --font-zh: 'Noto Serif SC', serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+@layer base {
+  :root {
+    --bg: #F7F4EF;
+    --bg-surface: #EFEBE4;
+    --text: #1C1917;
+    --text-muted: #78716C;
+    --accent: #7C6F5B;
+    --link: #4F5EA8;
+    --link-hover: #2D3A7A;
+    --border: #DDD8CE;
+  }
+
+  :root.dark {
+    --bg: #1A1917;
+    --bg-surface: #242220;
+    --text: #E8E3D9;
+    --text-muted: #A09890;
+    --accent: #A89880;
+    --link: #8C9EE8;
+    --link-hover: #B0BCFF;
+    --border: #3A3632;
+  }
+
+  /* 
+    ========================================
+    FONT SIZE CUSTOMIZATION GUIDE
+    ========================================
+    To change font sizes, modify the "font-size" values below.
+    
+    1. The 'body' rules target English globally (default mobile).
+    2. The 'html[lang="zh"] body' rules target Chinese.
+    3. Inside the @media (min-width: 1024px) blocks, you can adjust Desktop sizing.
+  */
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    font-size: 13px;
+    line-height: 1.8;
+    font-family: var(--font-sans);
+  }
+
+  @media (min-width: 1024px) {
+    body {
+      font-size: 15px;
+    }
+  }
+
+  html[lang="zh"] body {
+    font-size: 13px;
+  }
+
+  @media (min-width: 1024px) {
+    html[lang="zh"] body {
+      font-size: 15px;
+    }
+  }
+
+  html[lang="en"] .prose-body,
+  html[lang="en"] .prose-body h1,
+  html[lang="en"] .prose-body h2,
+  html[lang="en"] .prose-body h3,
+  html[lang="en"] .prose-body h4 {
+    font-family: var(--font-serif);
+  }
+
+  html[lang="zh"] .prose-body,
+  html[lang="zh"] .prose-body h1,
+  html[lang="zh"] .prose-body h2,
+  html[lang="zh"] .prose-body h3,
+  html[lang="zh"] .prose-body h4 {
+    font-family: var(--font-zh);
+  }
+
+
+}
+
+@layer components {
+  .animated-link {
+    text-decoration: none;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-repeat: no-repeat;
+    background-position: left bottom;
+    transition: background-size 0.25s ease, color 0.2s ease;
+  }
+
+  .animated-link:hover {
+    background-size: 100% 1px;
+  }
+}
+
+:root.dark .astro-code,
+:root.dark .astro-code span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
+}
+
+.math-display {
+  display: block;
+  text-align: center;
+  margin: 2em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}

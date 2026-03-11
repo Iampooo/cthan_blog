@@ -1,0 +1,51 @@
+---
+import ThemeToggle from './ThemeToggle.astro';
+
+interface Props {
+  isArticle?: boolean;
+}
+
+const { isArticle = false } = Astro.props;
+---
+
+<header id="site-nav" class="fixed top-0 left-0 right-0 z-50 transition-transform duration-200 ease-in-out bg-bg/80 backdrop-blur-md border-b border-transparent">
+  <div class="max-w-[720px] mx-auto px-4 md:px-8 py-6 flex justify-between items-center transition-all duration-300">
+    <a href="/blog" class="text-lg font-bold text-text hover:text-accent transition-colors">
+      CT
+    </a>
+    <div class="flex items-center gap-6 font-sans text-sm">
+      <a href="/blog" class="text-text hover:text-accent transition-colors">Blog</a>
+      <a href="/about" class="text-text hover:text-accent transition-colors">About</a>
+      <ThemeToggle />
+    </div>
+  </div>
+</header>
+
+{isArticle && (
+  <script>
+    let lastScrollY = window.scrollY;
+    const nav = document.getElementById('site-nav');
+    
+    const handleScroll = () => {
+      if (!nav) return;
+      const currentScrollY = window.scrollY;
+      
+      // Always show nav if within 60px of top
+      if (currentScrollY <= 60) {
+        nav.style.transform = 'translateY(0)';
+      } else if (currentScrollY > lastScrollY) {
+        // Scrolling down
+        nav.style.transform = 'translateY(-100%)';
+      } else {
+        // Scrolling up
+        nav.style.transform = 'translateY(0)';
+      }
+      
+      lastScrollY = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+  </script>
+)}
+<!-- spacer to prevent content overlap -->
+<div class="h-16"></div>

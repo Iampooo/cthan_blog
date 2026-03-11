@@ -1,0 +1,33 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  article: CollectionEntry<'articles'>;
+}
+
+const { article } = Astro.props;
+const { title, type, date, lang } = article.data;
+
+const year = date.getFullYear();
+// To make it clear it's EN or ZH
+const langIndicator = lang === 'zh' ? '中' : 'EN';
+---
+
+<li class="article-item group py-3" data-type={type} data-lang={lang} data-date={date.getTime()}>
+  <div class="grid grid-cols-1 sm:grid-cols-[4rem_1fr] gap-2 sm:gap-6">
+    <div class="text-text-muted font-mono text-sm pt-0.5">
+      [{type}]
+    </div>
+    <div>
+      <h3 class="text-lg sm:text-xl font-serif mb-1 leading-tight">
+        <a href={`/articles/${article.slug}`} class="text-text group-hover:text-accent outline-none animated-link">
+          {title}
+        </a>
+      </h3>
+      <div class="text-text-muted text-sm font-sans flex items-center gap-2">
+        <span>{year}</span>
+        <span class="text-[0.65rem] border border-border rounded px-1">{langIndicator}</span>
+      </div>
+    </div>
+  </div>
+</li>

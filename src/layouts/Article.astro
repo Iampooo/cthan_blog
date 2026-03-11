@@ -1,0 +1,249 @@
+---
+import { getCollection } from 'astro:content';
+import Base from './Base.astro';
+import Nav from '../components/Nav.astro';
+
+const { frontmatter } = Astro.props;
+const { title, type, date, lang, readTime, slug } = frontmatter;
+const year = date.getFullYear();
+const formattedDate = date.toLocaleDateString(lang === 'zh' ? 'zh-CN' : 'en-US', {
+  year: 'numeric', month: 'long', day: 'numeric'
+});
+
+const allArticles = await getCollection('articles');
+let alternateUrl = null;
+
+if (slug) {
+  if (slug.endsWith('-en')) {
+    const baseSlug = slug.replace(/-en$/, '');
+    if (allArticles.some(a => a.slug === baseSlug)) {
+      alternateUrl = `/articles/${baseSlug}`;
+    }
+  } else {
+    const enSlug = `${slug}-en`;
+    if (allArticles.some(a => a.slug === enSlug)) {
+      alternateUrl = `/articles/${enSlug}`;
+    }
+  }
+}
+---
+
+<Base title={title} lang={lang} description={frontmatter.description}>
+  <Nav isArticle={true} />
+  
+  <article class="w-full max-w-[1240px] mx-auto px-4 md:px-8 py-12 lg:py-20 relative overflow-x-hidden">
+    <div class="grid lg:grid-cols-[1fr_minmax(auto,680px)_1fr] gap-x-4 lg:gap-x-8 justify-center relative">
+      <aside class="hidden lg:block relative" id="left-margin"></aside>
+      
+      <div class="col-start-1 lg:col-start-2 relative">
+        <header class="mb-12">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
+          <h1 class="text-3xl sm:text-4xl font-serif font-bold text-text leading-tight">{title}</h1>
+          {alternateUrl && (
+            <a href={alternateUrl} class="shrink-0 text-xs font-sans px-2.5 py-1.5 rounded border border-border text-text-muted hover:text-text hover:border-text transition-colors flex items-center gap-2">
+              <span class={lang === 'zh' ? 'text-text font-bold' : ''}>中</span>
+              <span class="opacity-50">/</span>
+              <span class={lang === 'en' ? 'text-text font-bold' : ''}>EN</span>
+            </a>
+          )}
+        </div>
+        <div class="text-text-muted font-sans text-sm flex items-center gap-3 flex-wrap">
+          <span class="font-mono text-xs opacity-80 border border-border px-1.5 py-0.5 rounded">[{type}]</span>
+          <span>&middot;</span>
+          <time datetime={date.toISOString()}>{formattedDate}</time>
+          <span>&middot;</span>
+          <span>{readTime}</span>
+        </div>
+      </header>
+      
+        <div class="prose-body relative" id="prose-content">
+          <slot />
+        </div>
+        
+        <footer class="mt-20 pt-8 border-t border-border flex justify-between items-center font-sans text-sm">
+          <a href="/blog" class="text-text-muted hover:text-accent animated-link">&larr; Back to blog</a>
+        </footer>
+      </div>
+
+      <aside class="hidden lg:block relative" id="right-margin"></aside>
+    </div>
+  </article>
+</Base>
+
+<script>
+  const transformFootnotes = () => {
+    const root = document.getElementById('prose-content');
+    const leftMargin = document.getElementById('left-margin');
+    const rightMargin = document.getElementById('right-margin');
+    if (!root || !leftMargin || !rightMargin) return;
+    
+    // Hide standard Astro footnotes list completely as requested
+    const footnotesSection = document.querySelector('.footnotes') || document.querySelector('section[data-footnotes]');
+    if (footnotesSection) footnotesSection.style.display = 'none';
+
+    // 1. Process inline footnotes ^[like this]
+    const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+    const textNodes = [];
+    let n;
+    while (n = walk.nextNode()) textNodes.push(n);
+
+    let inlineCount = 1;
+    textNodes.forEach(node => {
+      let isCode = false;
+      let parent = node.parentNode as HTMLElement | null;
+      while (parent && parent !== root) {
+        if (parent.tagName === 'CODE' || parent.tagName === 'PRE') { isCode = true; break; }
+        parent = parent.parentNode as HTMLElement | null;
+      }
+      if (isCode || !node.nodeValue) return;
+
+      const regex = /\^\[(.*?)\]/g;
+      if (regex.test(node.nodeValue)) {
+        const frag = document.createDocumentFragment();
+        let lastIdx = 0;
+        node.nodeValue.replace(regex, (match, content, offset) => {
+          if (offset > lastIdx) {
+            frag.appendChild(document.createTextNode(node.nodeValue!.substring(lastIdx, offset)));
+          }
+          const span = document.createElement('span');
+          span.className = 'inline-fn-ref cursor-pointer text-accent hover:text-text font-sans text-[0.75rem] align-super mx-0.5';
+          span.dataset.content = content;
+          span.dataset.num = inlineCount.toString();
+          span.textContent = `[${inlineCount++}]`;
+          frag.appendChild(span);
+          lastIdx = offset + match.length;
+          return match;
+        });
+        if (lastIdx < node.nodeValue.length) {
+          frag.appendChild(document.createTextNode(node.nodeValue.substring(lastIdx)));
+        }
+        if (node.parentNode) node.parentNode.replaceChild(frag, node);
+      }
+    });
+
+    // 2. Position them in the margins
+    const positionNotes = () => {
+      const refs = document.querySelectorAll('.inline-fn-ref');
+      if (refs.length === 0) return;
+      const rootRect = root.getBoundingClientRect();
+      
+      let leftBottom = 0;
+      let rightBottom = 0;
+
+      leftMargin.innerHTML = '';
+      rightMargin.innerHTML = '';
+
+      refs.forEach(ref => {
+        const el = ref as HTMLElement;
+        const content = el.dataset.content;
+        const num = el.dataset.num;
+        const refRect = el.getBoundingClientRect();
+        
+        const xPos = refRect.left - rootRect.left;
+        const isLeft = xPos < (rootRect.width / 2);
+        
+        let yPos;
+        if (isLeft) {
+          yPos = refRect.top - leftMargin.getBoundingClientRect().top;
+        } else {
+          yPos = refRect.top - rightMargin.getBoundingClientRect().top;
+        }
+        
+        const note = document.createElement('div');
+        note.className = 'absolute w-full text-[0.75rem] text-text-muted font-serif leading-relaxed mb-4 transition-colors break-words opacity-90';
+        note.innerHTML = `<span class="opacity-60 mr-1 text-[0.65rem] align-super">${num}</span><span>${content}</span>`;
+        
+        if (isLeft) {
+          note.style.right = '0';
+          note.style.textAlign = 'right';
+          if (yPos < leftBottom) yPos = leftBottom + 16;
+          note.style.top = yPos + 'px';
+          leftMargin.appendChild(note);
+          setTimeout(() => leftBottom = yPos + note.offsetHeight, 0);
+        } else {
+          note.style.left = '0';
+          note.style.textAlign = 'left';
+          if (yPos < rightBottom) yPos = rightBottom + 16;
+          note.style.top = yPos + 'px';
+          rightMargin.appendChild(note);
+          setTimeout(() => rightBottom = yPos + note.offsetHeight, 0);
+        }
+
+        el.addEventListener('mouseenter', () => note.classList.add('text-text'));
+        el.addEventListener('mouseleave', () => note.classList.remove('text-text'));
+      });
+    }
+
+    setTimeout(positionNotes, 150);
+    window.addEventListener('resize', () => setTimeout(positionNotes, 150));
+  };
+
+  if (document.readyState === 'complete') {
+    transformFootnotes();
+  } else {
+    window.addEventListener('load', transformFootnotes);
+  }
+</script>
+<style is:global>
+  /* Markdown Content Styling */
+  .prose-body p { margin-bottom: 1.5em; }
+  .prose-body h1, .prose-body h2, .prose-body h3 {
+    margin-top: 2em; margin-bottom: 0.75em;
+    font-weight: 700; color: var(--text);
+  }
+  .prose-body h2 { font-size: 1.5em; }
+  .prose-body h3 { font-size: 1.25em; }
+  .prose-body ul, .prose-body ol { margin-left: 1.5em; margin-bottom: 1.5em; list-style: outside; }
+  .prose-body ul { list-style-type: disc; }
+  .prose-body li { margin-bottom: 0.5em; }
+  .prose-body a { color: var(--link); text-decoration: none; }
+  .prose-body a:hover { color: var(--link-hover); text-decoration: underline; text-decoration-style: dashed; }
+  
+  .prose-body code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    background-color: var(--bg-surface);
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+  }
+  
+  .prose-body pre {
+    background-color: var(--bg-surface) !important;
+    padding: 1.25em;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-size: 0.85em;
+    margin-bottom: 1.5em;
+    border: 1px solid var(--border);
+  }
+  .prose-body pre code {
+    background-color: transparent;
+    padding: 0;
+    color: inherit;
+  }
+
+  .prose-body blockquote {
+    border-left: 3px solid var(--accent);
+    padding-left: 1em;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-bottom: 1.5em;
+  }
+
+  .prose-body img,
+  .prose-body video {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 2em auto;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  }
+  
+  :root.dark .prose-body img,
+  :root.dark .prose-body video {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+    opacity: 0.9;
+  }
+
+
+</style>
