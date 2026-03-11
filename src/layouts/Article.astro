@@ -32,29 +32,28 @@ if (slug) {
   <Nav isArticle={true} />
   
   <article class="w-full max-w-[1240px] mx-auto px-4 md:px-8 py-12 lg:py-20 relative overflow-x-hidden">
-    <div class="grid lg:grid-cols-[1fr_minmax(auto,680px)_1fr] gap-x-4 lg:gap-x-8 justify-center relative">
+    <div class="grid lg:grid-cols-[1fr_minmax(0,680px)_1fr] gap-x-4 lg:gap-x-8 justify-center relative">
       <aside class="hidden lg:block relative" id="left-margin"></aside>
       
-      <div class="col-start-1 lg:col-start-2 relative">
+      <div class="col-start-1 lg:col-start-2 relative min-w-0">
         <header class="mb-12">
-        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
-          <h1 class="text-3xl sm:text-4xl font-serif font-bold text-text leading-tight">{title}</h1>
-          {alternateUrl && (
-            <a href={alternateUrl} class="shrink-0 text-xs font-sans px-2.5 py-1.5 rounded border border-border text-text-muted hover:text-text hover:border-text transition-colors flex items-center gap-2">
-              <span class={lang === 'zh' ? 'text-text font-bold' : ''}>中</span>
-              <span class="opacity-50">/</span>
-              <span class={lang === 'en' ? 'text-text font-bold' : ''}>EN</span>
-            </a>
-          )}
-        </div>
-        <div class="text-text-muted font-sans text-sm flex items-center gap-3 flex-wrap">
-          <span class="font-mono text-xs opacity-80 border border-border px-1.5 py-0.5 rounded">[{type}]</span>
-          <span>&middot;</span>
-          <time datetime={date.toISOString()}>{formattedDate}</time>
-          <span>&middot;</span>
-          <span>{readTime}</span>
-        </div>
-      </header>
+          <h1 class="text-3xl sm:text-4xl font-serif font-bold text-text leading-tight mb-4 break-words">{title}</h1>
+          <div class="text-text-muted font-sans text-sm flex items-center gap-3 flex-wrap">
+            <span class="font-mono text-xs opacity-80 border border-border px-1.5 py-0.5 rounded">[{type}]</span>
+            <span>&middot;</span>
+            <time datetime={date.toISOString()}>{formattedDate}</time>
+            <span>&middot;</span>
+            <span>{readTime}</span>
+            {alternateUrl && (
+              <>
+                <span>&middot;</span>
+                <a href={alternateUrl} class="shrink-0 text-xs font-sans px-2 py-0.5 rounded border border-border text-text-muted hover:text-text hover:border-text transition-colors">
+                  {lang === 'zh' ? 'EN' : '中'}
+                </a>
+              </>
+            )}
+          </div>
+        </header>
       
         <div class="prose-body relative" id="prose-content">
           <slot />
@@ -186,6 +185,10 @@ if (slug) {
 </script>
 <style is:global>
   /* Markdown Content Styling */
+  .prose-body {
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
   .prose-body p { margin-bottom: 1.5em; }
   .prose-body h1, .prose-body h2, .prose-body h3 {
     margin-top: 2em; margin-bottom: 0.75em;
