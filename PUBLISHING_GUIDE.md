@@ -15,7 +15,7 @@ Every post **must** have a block of YAML "frontmatter" at the very top of the fi
 
 ```yaml
 ---
-type: "essay"          # Must be exactly one of: 'book', 'essay', 'memo', 'learn'
+type: "essay"          # Must be exactly one of: 'essay', 'memo', 'note'
 title: "Your Title"    # The display title of the post
 date: 2024-03-10       # Standard ISO date format (YYYY-MM-DD)
 lang: "en"             # Language of the post: 'en' for English, 'zh' for Chinese
