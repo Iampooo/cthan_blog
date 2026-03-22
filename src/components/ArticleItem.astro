@@ -3,14 +3,16 @@ import type { CollectionEntry } from 'astro:content';
 
 interface Props {
   article: CollectionEntry<'articles'>;
+  hasTranslation?: boolean;
 }
 
-const { article } = Astro.props;
+const { article, hasTranslation = false } = Astro.props;
 const { title, type, date, lang } = article.data;
 
 const year = date.getFullYear();
 // To make it clear it's EN or ZH
 const langIndicator = lang === 'zh' ? '中' : 'EN';
+const altLangIndicator = lang === 'zh' ? 'EN' : '中';
 ---
 
 <li class="article-item group py-3" data-type={type} data-lang={lang} data-date={date.getTime()}>
@@ -26,7 +28,12 @@ const langIndicator = lang === 'zh' ? '中' : 'EN';
       </h3>
       <div class="text-text-muted text-sm font-sans flex items-center gap-2">
         <span>{year}</span>
-        <span class="text-[0.65rem] border border-border rounded px-1">{langIndicator}</span>
+        <div class="flex items-center gap-1">
+          <span class="text-[0.65rem] border border-border rounded px-1 text-text">{langIndicator}</span>
+          {hasTranslation && (
+            <span class="text-[0.65rem] border border-border/50 rounded px-1 opacity-60">{altLangIndicator}</span>
+          )}
+        </div>
       </div>
     </div>
   </div>

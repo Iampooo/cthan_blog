@@ -1,12 +1,11 @@
 ---
-type: "memo"
-title: "Markdown 語法測試"
-date: 2026-03-09
-lang: "zh"
-tags: ["reading"]
-description: "hihihi"
+type: "note"          
+title: "Markdown Test"    
+date: 2026-03-11
+lang: "en" 
+tags: ["note"]
+draft: true
 ---
-
 # h1 Heading 
 ## h2 Heading
 ### h3 Heading
@@ -36,34 +35,80 @@ _This is italic text_
 ~~Strikethrough~~
 
 ## Callouts
-> [!note]
+<div class="callout callout-note">
+<div class="callout-title">Note</div>
+</div>
 
-> [!tldr]
 
->[!info]
+<div class="callout callout-tldr">
+<div class="callout-title">Tldr</div>
+</div>
 
->[!todo]
 
-> [!tip]
+<div class="callout callout-info">
+<div class="callout-title">Info</div>
+</div>
 
->[!success]
 
-> [!question]
+<div class="callout callout-todo">
+<div class="callout-title">Todo</div>
+</div>
 
-> [!warning]
 
-> [!fail]
+<div class="callout callout-tip">
+<div class="callout-title">Tip</div>
+</div>
 
-> [!danger]
 
-> [!bug]
+<div class="callout callout-success">
+<div class="callout-title">Success</div>
+</div>
 
-> [!example]
 
-> [!quote]
+<div class="callout callout-question">
+<div class="callout-title">Question</div>
+</div>
 
-> [!Info]+
-> 人物介紹
+
+<div class="callout callout-warning">
+<div class="callout-title">Warning</div>
+</div>
+
+
+<div class="callout callout-fail">
+<div class="callout-title">Fail</div>
+</div>
+
+
+<div class="callout callout-danger">
+<div class="callout-title">Danger</div>
+</div>
+
+
+<div class="callout callout-bug">
+<div class="callout-title">Bug</div>
+</div>
+
+
+<div class="callout callout-example">
+<div class="callout-title">Example</div>
+</div>
+
+
+<div class="callout callout-quote">
+<div class="callout-title">Quote</div>
+</div>
+
+
+<div class="callout callout-info">
+<div class="callout-title">Info</div>
+<div class="callout-content">
+
+人物介紹
+
+</div>
+</div>
+
 ## Blockquotes
 
 

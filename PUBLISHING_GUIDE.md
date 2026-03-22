@@ -90,3 +90,41 @@ If you want the reading column wider or narrower, edit `src/layouts/Article.astr
 
 Find `<div class="grid lg:grid-cols-[1fr_minmax(auto,680px)_1fr]...`
 Change the `680px` to whatever pixel width you desire for the central text column!
+
+---
+
+## 5. Creating Plots with Matplotlib
+
+All plot infrastructure lives in the `plots/` directory.
+
+### Quick Start
+```python
+import matplotlib.pyplot as plt
+plt.style.use('plots/cthan_light.mplstyle')
+
+# ... your plot code ...
+
+fig.savefig('public/figures/my-chart-light.svg')
+```
+
+### For Dark Mode Support
+Generate both light and dark versions, then use `<picture>` in your markdown:
+```html
+<picture>
+  <source srcset="/figures/my-chart-dark.svg" media="(prefers-color-scheme: dark)">
+  <img src="/figures/my-chart-light.svg" alt="My Chart">
+</picture>
+```
+
+### File Structure
+```
+plots/
+├── cthan_light.mplstyle    ← light mode style
+├── cthan_dark.mplstyle     ← dark mode style
+└── scripts/
+    └── sample_plot.py      ← example / template
+public/figures/
+    └── *.svg / *.png       ← output goes here
+```
+
+Run any plot script from the repo root: `python plots/scripts/my_plot.py`

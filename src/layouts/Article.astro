@@ -4,7 +4,7 @@ import Base from './Base.astro';
 import Nav from '../components/Nav.astro';
 
 const { frontmatter } = Astro.props;
-const { title, type, date, lang, readTime, slug } = frontmatter;
+const { title, type, date, lang, readTime, slug, tags } = frontmatter;
 const year = date.getFullYear();
 const formattedDate = date.toLocaleDateString(lang === 'zh' ? 'zh-CN' : 'en-US', {
   year: 'numeric', month: 'long', day: 'numeric'
@@ -58,8 +58,16 @@ if (slug) {
         <div class="prose-body relative" id="prose-content">
           <slot />
         </div>
+
+        {tags && tags.length > 0 && (
+          <div class="mt-16 flex flex-wrap gap-3 font-mono text-xs text-text-muted">
+            {tags.map((tag: string) => (
+              <span>[{tag}]</span>
+            ))}
+          </div>
+        )}
         
-        <footer class="mt-20 pt-8 border-t border-border flex justify-between items-center font-sans text-sm">
+        <footer class="mt-8 pt-8 border-t border-border flex justify-between items-center font-sans text-sm">
           <a href="/blog" class="text-text-muted hover:text-accent animated-link">&larr; Back to blog</a>
         </footer>
       </div>
@@ -241,6 +249,15 @@ if (slug) {
     margin: 2em auto;
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   }
+
+  /* Support <picture> elements for dark/light plot switching */
+  .prose-body picture {
+    display: block;
+    margin: 2em auto;
+  }
+  .prose-body picture img {
+    margin: 0 auto;
+  }
   
   :root.dark .prose-body img,
   :root.dark .prose-body video {
@@ -248,5 +265,84 @@ if (slug) {
     opacity: 0.9;
   }
 
+  /* Target the exact element rehype-katex outputs for block math to prevent flex/grid blowouts */
+  .prose-body .math-display {
+    display: block;
+    overflow-x: auto;
+    overflow-y: hidden;
+    margin: 2em 0;
+    text-align: center;
+  }
 
+  /* Hide MathML for screen readers to avoid duplicate text output */
+  .katex-mathml {
+    display: none !important;
+  }
+
+  /* ── Callouts ─────────────────────────────────────────────── */
+  .prose-body .callout {
+    border-left: 3px solid var(--accent);
+    background: color-mix(in srgb, var(--accent) 6%, transparent);
+    border-radius: 4px;
+    padding: 0.75em 1em;
+    margin-bottom: 1.5em;
+  }
+  .prose-body .callout-title {
+    font-weight: 700;
+    font-size: 0.9em;
+    margin-bottom: 0.4em;
+    color: var(--text);
+  }
+  .prose-body .callout-content {
+    font-style: normal;
+    color: var(--text);
+    font-size: 0.92em;
+  }
+  .prose-body .callout-content p { margin-bottom: 0.5em; }
+  .prose-body .callout-content p:last-child { margin-bottom: 0; }
+
+  /* Callout type colors */
+  .prose-body .callout-info,
+  .prose-body .callout-todo   { border-left-color: #448aff; background: color-mix(in srgb, #448aff 6%, transparent); }
+  .prose-body .callout-tip,
+  .prose-body .callout-success { border-left-color: #00c853; background: color-mix(in srgb, #00c853 6%, transparent); }
+  .prose-body .callout-warning { border-left-color: #ff9100; background: color-mix(in srgb, #ff9100 6%, transparent); }
+  .prose-body .callout-danger,
+  .prose-body .callout-fail,
+  .prose-body .callout-bug     { border-left-color: #ff5252; background: color-mix(in srgb, #ff5252 6%, transparent); }
+  .prose-body .callout-question { border-left-color: #ffab00; background: color-mix(in srgb, #ffab00 6%, transparent); }
+  .prose-body .callout-example  { border-left-color: #7c4dff; background: color-mix(in srgb, #7c4dff 6%, transparent); }
+  .prose-body .callout-quote,
+  .prose-body .callout-note,
+  .prose-body .callout-tldr     { border-left-color: var(--accent); }
+
+  /* ── Styled Quote (special [!quote] with name) ────────────── */
+  .prose-body .styled-quote {
+    text-align: center;
+    margin: 2.5em 0;
+    padding: 1em 0;
+  }
+  .prose-body .styled-quote-mark {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 3.5em;
+    line-height: 0.6;
+    color: var(--accent);
+    opacity: 0.4;
+    margin-bottom: 0.2em;
+  }
+  .prose-body .styled-quote-text {
+    font-style: italic;
+    font-size: 1.1em;
+    color: var(--text);
+    max-width: 32em;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+  .prose-body .styled-quote-text p { margin-bottom: 0.3em; }
+  .prose-body .styled-quote-source {
+    margin-top: 0.6em;
+    font-size: 0.9em;
+    color: var(--text-muted);
+    font-style: normal;
+  }
 </style>

@@ -1,0 +1,68 @@
+# cthan_light.mplstyle
+# Light mode plot style matching the blog at cthan.dev
+# Usage: plt.style.use('plots/cthan_light.mplstyle')
+
+# ── Canvas ──
+figure.facecolor:    F7F4EF
+figure.edgecolor:    F7F4EF
+figure.dpi:          150
+figure.figsize:      8, 5
+
+# ── Axes ──
+axes.facecolor:      F7F4EF
+axes.edgecolor:      DDD8CE
+axes.labelcolor:     78716C
+axes.titlecolor:     1C1917
+axes.spines.top:     False
+axes.spines.right:   False
+axes.linewidth:      0.8
+axes.titlesize:      14
+axes.titleweight:    600
+axes.labelsize:      11
+axes.titlepad:       14
+axes.labelpad:       8
+
+# ── Color cycle (link, accent, accent-warm, link-hover, text-muted) ──
+axes.prop_cycle:     cycler('color', ['4F5EA8','7C6F5B','A89880','2D3A7A','78716C','8C6E4A'])
+
+# ── Grid ──
+axes.grid:           True
+grid.color:          DDD8CE
+grid.linestyle:      --
+grid.linewidth:      0.5
+grid.alpha:          0.7
+
+# ── Ticks ──
+xtick.color:         78716C
+ytick.color:         78716C
+xtick.labelsize:     10
+ytick.labelsize:     10
+xtick.direction:     out
+ytick.direction:     out
+xtick.major.width:   0.6
+ytick.major.width:   0.6
+xtick.major.size:    4
+ytick.major.size:    4
+
+# ── Text ──
+text.color:          1C1917
+font.family:         serif
+font.serif:          Spectral, Georgia, Times New Roman, serif
+font.size:           12
+mathtext.fontset:    dejavuserif
+
+# ── Lines ──
+lines.linewidth:     2.0
+lines.markersize:    6
+lines.markeredgewidth: 0
+
+# ── Legend ──
+legend.frameon:      False
+legend.fontsize:     10
+legend.loc:          best
+
+# ── Save ──
+savefig.bbox:        tight
+savefig.pad_inches:  0.15
+savefig.transparent: True
+savefig.dpi:         200

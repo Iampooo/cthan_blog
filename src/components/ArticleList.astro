@@ -7,16 +7,37 @@ const allArticles = await getCollection('articles', ({ data }) => {
   return data.draft !== true;
 });
 
-const filteredArticles = allArticles.filter(article => {
-  if (article.slug.endsWith('-en')) {
-    const baseSlug = article.slug.replace(/-en$/, '');
-    return !allArticles.some(a => a.slug === baseSlug);
+// Filter out translations if primary exists, but track them
+const articlesBySlug = new Map();
+const translationCheck = new Set();
+
+allArticles.forEach(article => {
+  translationCheck.add(article.slug);
+});
+
+allArticles.forEach(article => {
+  const baseSlug = article.slug.replace(/-en$/, '');
+  
+  if (!articlesBySlug.has(baseSlug)) {
+    articlesBySlug.set(baseSlug, article);
+  } else if (article.data.lang === 'zh') {
+    // Prefer ZH over EN for the index list
+    articlesBySlug.set(baseSlug, article);
   }
-  return true;
+});
+
+const filteredArticles = Array.from(articlesBySlug.values()).map(article => {
+  const baseSlug = article.slug.replace(/-en$/, '');
+  const alternateSlug = article.data.lang === 'zh' ? `${baseSlug}-en` : baseSlug;
+  const hasTranslation = article.data.lang === 'zh' 
+    ? translationCheck.has(alternateSlug)
+    : translationCheck.has(baseSlug);
+    
+  return { article, hasTranslation };
 });
 
 // Sort by latest initially
-const sortedArticles = filteredArticles.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+const sortedItems = filteredArticles.sort((a, b) => b.article.data.date.valueOf() - a.article.data.date.valueOf());
 
 let __currentYear = 0;
 ---
@@ -25,14 +46,14 @@ let __currentYear = 0;
   <TypeFilter />
   
   <ul id="article-list" class="flex flex-col list-none p-0 m-0">
-    {sortedArticles.map((article) => {
+    {sortedItems.map(({ article, hasTranslation }) => {
       const year = article.data.date.getFullYear();
       const showYear = year !== __currentYear;
       if (showYear) __currentYear = year;
       return (
         <>
           {showYear && <li class="year-header text-2xl font-serif text-text mt-8 mb-4 border-b border-border pb-2">{year}</li>}
-          <ArticleItem article={article} />
+          <ArticleItem article={article} hasTranslation={hasTranslation} />
         </>
       );
     })}
